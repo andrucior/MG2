@@ -31,6 +31,16 @@ public:
 		return { -x, -y, -z };
 	}
 
+	Vector3 operator/(const Vector3&v) const {
+		if (std::abs(v.x) <= FLT_EPSILON ||
+			std::abs(v.y) <= FLT_EPSILON ||
+			std::abs(v.z) <= FLT_EPSILON) {
+			throw std::exception("Can't divide by 0!");
+		}
+
+		return { x / v.x, y / v.y, z / v.z };
+	}
+
 	Vector3 cross(const Vector3& v) const {
 		return Vector3(
 			y * v.z - z * v.y,
@@ -50,7 +60,7 @@ public:
 	Vector3 normalize() const {
 		float len = length();
 
-		if (len == 0) return Vector3();
+		if (std::abs(len) <= FLT_EPSILON) throw std::exception("Length of vector can't be 0");
 		
 		return (*this) * (1 / len);
 	}

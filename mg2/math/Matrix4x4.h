@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <array>
 #include <cmath>
 #include <iomanip>
@@ -26,16 +26,13 @@ public:
         return Matrix4x4(m);
     }
 
-    // Dostêp do elementów
     float* operator[](int row) { return m[row].data(); }
     const float* operator[](int row) const { return m[row].data(); }
 
-    // Mno¿enie macierzy
     Matrix4x4 operator*(const Matrix4x4& other) const {
-        Matrix4x4 result = Identity();
+        Matrix4x4 result = Matrix4x4();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result[i][j] = 0;
                 for (int k = 0; k < 4; k++)
                     result[i][j] += m[i][k] * other[k][j];
             }
@@ -43,7 +40,7 @@ public:
         return result;
     }
 
-    // Mno¿enie macierzy przez wektor 
+    // MnoÅ¼enie macierzy przez wektor 
     Vector4 operator*(const Vector4& v) const {
         float x = m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3] * v.w;
         float y = m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z + m[1][3] * v.w;
@@ -71,6 +68,10 @@ public:
         return result;
     }
 
+    static Matrix4x4 translate(Vector3 translateVector) {
+        return translate(translateVector.x, translateVector.y, translateVector.z);
+    }
+
     // Macierz skalowania
     static Matrix4x4 scale(float sx, float sy, float sz) {
         Matrix4x4 result = Identity();
@@ -80,7 +81,11 @@ public:
         return result;
     }
 
-    // Macierz obrotu wokó³ osi X
+    static Matrix4x4 scale(Vector3 scaleVector) {
+        return scale(scaleVector.x, scaleVector.y, scaleVector.z);
+    }
+
+    // Macierz obrotu wokÃ³Å‚ osi X
     static Matrix4x4 rotateX(float angle) {
         Matrix4x4 result = Identity();
         float c = std::cos(angle);
@@ -90,7 +95,8 @@ public:
         return result;
     }
 
-    // Macierz obrotu wokó³ osi Y
+
+    // Macierz obrotu wokÃ³Å‚ osi Y
     static Matrix4x4 rotateY(float angle) {
         Matrix4x4 result = Identity();
         float c = std::cos(angle);
@@ -100,7 +106,7 @@ public:
         return result;
     }
 
-    // Macierz obrotu wokó³ osi Z
+    // Macierz obrotu wokÃ³Å‚ osi Z
     static Matrix4x4 rotateZ(float angle) {
         Matrix4x4 result = Identity();
         float c = std::cos(angle);
@@ -110,36 +116,35 @@ public:
         return result;
     }
 
-    // Odwrócenie macierzy
-    static Matrix4x4 inverse(const Matrix4x4& mat) {
-        float aug[4][8];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) aug[i][j] = mat[i][j];
-            for (int j = 0; j < 4; j++) aug[i][j + 4] = (i == j) ? 1.0f : 0.0f;
-        }
-        for (int col = 0; col < 4; col++) {
-            // Pivot
-            int pivot = col;
-            for (int row = col + 1; row < 4; row++)
-                if (std::abs(aug[row][col]) > std::abs(aug[pivot][col]))
-                    pivot = row;
-            std::swap(aug[col], aug[pivot]);
-
-            float div = aug[col][col];
-            for (int j = 0; j < 8; j++) aug[col][j] /= div;
-
-            for (int row = 0; row < 4; row++) {
-                if (row == col) continue;
-                float factor = aug[row][col];
-                for (int j = 0; j < 8; j++)
-                    aug[row][j] -= factor * aug[col][j];
-            }
-        }
+    static Matrix4x4 rotate(Vector3 rotationVector) {
+        return rotateX(rotationVector.x) 
+            * rotateY(rotationVector.y) 
+            * rotateZ(rotationVector.z);
+    }
+    
+    static Matrix4x4 projection(float aspect, float f, float n, float fovY_rad) {
         Matrix4x4 result;
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                result[i][j] = aug[i][j + 4];
+        float t = std::tan(fovY_rad / 2.0f);   
+
+        result[0][0] = 1.0f / (t * aspect);
+        result[1][1] = 1.0f / t;
+        result[2][2] = (f + n) / (f - n);
+        result[2][3] = (-2.0f * f * n) / (f - n);
+        result[3][2] = 1.0f;
         return result;
+    }
+
+    static Matrix4x4 projectionInverse(const Matrix4x4& P) {
+        float a = P[0][0], b = P[1][1];
+        float c = P[2][2], d = P[2][3];
+
+        Matrix4x4 inv;
+        inv[0][0] = 1.0f / a;
+        inv[1][1] = 1.0f / b;
+        inv[2][3] = 1.0f;           
+        inv[3][2] = 1.0f / d;
+        inv[3][3] = -c / d;
+        return inv;
     }
 
     Matrix4x4 Transposed() const {
@@ -151,6 +156,15 @@ public:
         }
         return result;
     }
+
+    std::array<float, 16> toFloatArray() const {
+        std::array<float, 16> flat;
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 4; c++)
+                flat[r * 4 + c] = m[r][c];
+        return flat;
+    }
+
     
     void print() const {
         for (int i = 0; i < 4; i++) {

@@ -1,4 +1,6 @@
 #pragma once
+#define _USE_MATH_DEFINES
+
 #include <glfw/glfw3.h>
 #include <imgui/imgui.h>
 
@@ -11,7 +13,7 @@ public:
     inline static bool   g_rightDown = false;
     inline static float  g_lastX = 0, g_lastY = 0;
     inline static float  g_rotX = 0, g_rotY = 0, g_rotZ = 0;
-    inline static float  g_tx = 0, g_ty = 0, g_tz = 0;
+    inline static float  g_tx = 0, g_ty = 0, g_tz = 5;
     inline static float  g_zoom = 1;
     inline static bool   g_scrolled = false;
 
@@ -31,8 +33,8 @@ public:
                 if (g_rotZ > 2 * M_PI) g_rotZ -= 2 * M_PI;
             }
             else {
-                g_rotY += dx * multiplicator;
-                g_rotX += dy * multiplicator;
+                g_rotY -= dx * multiplicator;
+                g_rotX -= dy * multiplicator;
 
                 if (g_rotY < 0) g_rotY += 2 * M_PI;
                 if (g_rotX < 0) g_rotX += 2 * M_PI;
@@ -43,8 +45,13 @@ public:
             }
         }
         if (g_rightDown) {
-            g_tx += dx * multiplicator;
-            g_ty += dy * multiplicator;
+            if(ctrlPressed) {
+                g_tz += dy * multiplicator;
+            }
+            else {
+                g_tx += dx * multiplicator;
+                g_ty -= dy * multiplicator;
+            }
         }
 
         g_lastX = xpos;
@@ -70,7 +77,7 @@ public:
 
     static void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         g_zoom += (float)yoffset * 0.1f;
-        g_zoom = std::min(std::max(0.1f, g_zoom), 5.0f);
+        g_zoom = std::min(std::max(0.1f, g_zoom), 10.0f);
         g_scrolled = true;
     }
 };
