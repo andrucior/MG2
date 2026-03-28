@@ -12,7 +12,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "LightController.h"
 #include "Scene.h"
 #include "math/Matrix4x4.h"
 #include "MouseController.h";
@@ -35,6 +34,7 @@ int main() {
         -1, 1, 0,1,  -1,-1, 0,0,  1,-1, 1,0,
         -1, 1, 0,1,   1,-1, 1,0,  1, 1, 1,1
     };
+
     Matrix4x4 M, P = Matrix4x4::projection(float(W) / H, 20.0f, 0.5f, 60.0f * (M_PI / 180.0f)), V;
 
     unsigned int VAO, VBO;

@@ -63,9 +63,6 @@
     <ClInclude Include="math\Vector4.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="LightController.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="MouseController.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
@@ -79,9 +76,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="shaders\Shader.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="shaders\MainShader.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="shaders\TorusShader.h">
@@ -122,8 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\lib\glfw3.pdb" />
-    <None Include="shaders\fs.glsl" />
-    <None Include="shaders\vs.glsl" />
     <None Include="shaders\fs_torus.glsl" />
     <None Include="shaders\vs_torus.glsl" />
   </ItemGroup>

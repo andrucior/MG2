@@ -12,7 +12,7 @@ public:
         : translation(translation), rotation(rotation), scale(scale) {}
 };
 
-// Przechowuje aktualny stan transformacji 
+// aktualny stan transformacji torusa
 class Scene {
 public:
     Transform& transform;

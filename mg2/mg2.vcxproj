@@ -152,14 +152,12 @@
     <ClInclude Include="Libraries\include\imgui\imstb_textedit.h" />
     <ClInclude Include="Libraries\include\imgui\imstb_truetype.h" />
     <ClInclude Include="Libraries\include\KHR\khrplatform.h" />
-    <ClInclude Include="LightController.h" />
     <ClInclude Include="math\Matrix4x4.h" />
     <ClInclude Include="math\Vector2.h" />
     <ClInclude Include="math\Vector3.h" />
     <ClInclude Include="math\Vector4.h" />
     <ClInclude Include="MouseController.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="shaders\MainShader.h" />
     <ClInclude Include="shaders\Shader.h" />
     <ClInclude Include="shaders\TorusShader.h" />
     <ClInclude Include="Torus.h" />
@@ -180,9 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\lib\glfw3.pdb" />
-    <None Include="shaders\fs.glsl" />
     <None Include="shaders\fs_torus.glsl" />
-    <None Include="shaders\vs.glsl" />
     <None Include="shaders\vs_torus.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
