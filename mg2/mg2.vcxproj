@@ -77,7 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;$(ProjectDir)model;$(ProjectDir)view;$(ProjectDir)shaders;$(ProjectDir)input;$(ProjectDir)math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,7 +95,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;$(ProjectDir)model;$(ProjectDir)view;$(ProjectDir)shaders;$(ProjectDir)input;$(ProjectDir)math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;$(ProjectDir)model;$(ProjectDir)view;$(ProjectDir)shaders;$(ProjectDir)input;$(ProjectDir)math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +129,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)utils;$(ProjectDir)Libraries\include;$(ProjectDir)model;$(ProjectDir)view;$(ProjectDir)shaders;$(ProjectDir)input;$(ProjectDir)math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="UI.h" />
+    <ClInclude Include="view\Camera.h" />
+    <ClInclude Include="view\Grid.h" />
+    <ClInclude Include="input\KeyboardController.h" />
     <ClInclude Include="Libraries\include\glad\glad.h" />
     <ClInclude Include="Libraries\include\GLFW\glfw3.h" />
     <ClInclude Include="Libraries\include\GLFW\glfw3native.h" />
@@ -152,17 +156,21 @@
     <ClInclude Include="Libraries\include\imgui\imstb_textedit.h" />
     <ClInclude Include="Libraries\include\imgui\imstb_truetype.h" />
     <ClInclude Include="Libraries\include\KHR\khrplatform.h" />
-    <ClInclude Include="LightController.h" />
     <ClInclude Include="math\Matrix4x4.h" />
     <ClInclude Include="math\Vector2.h" />
     <ClInclude Include="math\Vector3.h" />
     <ClInclude Include="math\Vector4.h" />
-    <ClInclude Include="MouseController.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="shaders\MainShader.h" />
+    <ClInclude Include="model\Point.h" />
+    <ClInclude Include="model\SceneObject.h" />
+    <ClInclude Include="model\Torus.h" />
+    <ClInclude Include="model\Transform.h" />
+    <ClInclude Include="model\TransformableObject.h" />
+    <ClInclude Include="input\MouseController.h" />
+    <ClInclude Include="view\Scene.h" />
+    <ClInclude Include="shaders\main\MainShader.h" />
+    <ClInclude Include="shaders\primitive\PrimitiveShader.h" />
     <ClInclude Include="shaders\Shader.h" />
-    <ClInclude Include="shaders\TorusShader.h" />
-    <ClInclude Include="Torus.h" />
+    <ClInclude Include="shaders\torus\TorusShader.h" />
     <ClInclude Include="utils\Nameof.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,16 +182,28 @@
     <ClCompile Include="Libraries\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Libraries\src\glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="model\Point.cpp" />
+    <ClCompile Include="shaders\primitive\PrimitiveShader.cpp" />
+    <ClCompile Include="model\SceneObject.cpp" />
+    <ClCompile Include="model\Torus.cpp" />
+    <ClCompile Include="input\MouseController.cpp" />
+    <ClCompile Include="shaders\torus\TorusShader.cpp" />
+    <ClCompile Include="UI.cpp" />
+    <ClCompile Include="view\Scene.cpp" />
+    <ClCompile Include="shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Libraries\lib\glfw3.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\lib\glfw3.pdb" />
-    <None Include="shaders\fs.glsl" />
-    <None Include="shaders\fs_torus.glsl" />
-    <None Include="shaders\vs.glsl" />
-    <None Include="shaders\vs_torus.glsl" />
+    <None Include="shaders\main\fs.glsl" />
+    <None Include="shaders\main\vs.glsl" />
+    <None Include="shaders\primitive\fs_primitive.glsl" />
+    <None Include="shaders\primitive\gs_primitive.glsl" />
+    <None Include="shaders\primitive\vs_primitive.glsl" />
+    <None Include="shaders\torus\fs_torus.glsl" />
+    <None Include="shaders\torus\vs_torus.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

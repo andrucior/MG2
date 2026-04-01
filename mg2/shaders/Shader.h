@@ -1,63 +1,31 @@
 #pragma once
+
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <glad/glad.h>
+#include <optional>
 
+#include "SceneObject.h"
+#include "Matrix4x4.h"
 
 class Shader {
 private:
-	std::string vertexCode, fragmentCode;
+	std::string vertexCode, fragmentCode, geomCode;
     
-    std::string loadShaderSource(const std::string& filePath) {
-        std::ifstream shaderFile;
-        shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    std::string loadShaderSource(const std::string& filePath);
 
-        try {
-            shaderFile.open(filePath);
-            std::stringstream shaderStream;
-            shaderStream << shaderFile.rdbuf();
-            shaderFile.close();
-            return shaderStream.str();
-        }
-        catch (std::ifstream::failure& e) {
-            std::cerr << "ERROR::SHADER::COULD NOT READ FILE: " << filePath << std::endl;
-            return "";
-        }
-    }
-
-    unsigned int compileShader(unsigned int type, const std::string& source) {
-        unsigned int s = glCreateShader(type);
-        const char* src = source.c_str();
-        glShaderSource(s, 1, &src, nullptr);
-        glCompileShader(s);
-
-        int success;
-        glGetShaderiv(s, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            char infoLog[512];
-            glGetShaderInfoLog(s, 512, NULL, infoLog);
-            std::cerr << "ERROR::COMPILATION FAILED:\n" << infoLog << std::endl;
-        }
-        return s;
-    }
+    unsigned int compileShader(unsigned int type, const std::string& source);
 
 public:
-    unsigned int vsId, fsId, program;
+    unsigned int vsId, fsId, gsId, program;
 
-    Shader(const std::string vertexCodePath, const std::string fragmentCodePath) {
-        vertexCode = loadShaderSource(vertexCodePath);
-        fragmentCode = loadShaderSource(fragmentCodePath);
-
-        vsId = compileShader(GL_VERTEX_SHADER, vertexCode);
-        fsId = compileShader(GL_FRAGMENT_SHADER, fragmentCode);
-
-        program = glCreateProgram();
-        glAttachShader(program, vsId);
-        glAttachShader(program, fsId);
-        glLinkProgram(program);
-    }
+    Shader(
+        const std::string vertexCodePath, 
+        const std::string fragmentCodePath,
+        const std::optional<std::string>& geomCodePath = std::nullopt
+    );
 
     virtual void Update() = 0;
 
@@ -72,5 +40,7 @@ public:
     void setUniform1f(GLint id, float value) {
         glUniform1f(id, 2.0f);
     }
+
+    virtual bool ownsObject(const SceneObject*) const { return false; }
 
 };
