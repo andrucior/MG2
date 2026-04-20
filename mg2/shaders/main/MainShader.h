@@ -52,11 +52,15 @@ public:
 		glEnableVertexAttribArray(0);
 	}
 
-	void Update() override {	
+	void Update() override {
 		glUseProgram(program);
 		glUniformMatrix4fv(uP, 1, GL_TRUE, P.toFloatArray().data());
 		glUniformMatrix4fv(uV, 1, GL_TRUE, camera.view().toFloatArray().data());
 		glUniformMatrix4fv(uM, 1, GL_TRUE, M.toFloatArray().data());
+	}
+
+	void draw() {
+		glUseProgram(program);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_LINES, 0, grid.vertices.size() / 3);
 	}

@@ -26,5 +26,6 @@ public:
         return &torus == obj;
     }
 
+    void draw() override;
     void Update() override;
 };

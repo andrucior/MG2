@@ -31,7 +31,6 @@
 #include "math/Vector2.h"
 #include "UI.h"
 
-// ─── Forward declarations ───────────────────────────────────────────────────
 GLFWwindow* initWindow(int& H, int& W);
 void        UpdateScreenSize(int& H, int& W);
 bool        handleResize(GLFWwindow* win, int panelWidth, int& W, int& H, Matrix4x4& P, GLuint tex);
@@ -43,7 +42,6 @@ void        handleCursorPlacement(Scene& scene, const Matrix4x4& P, Camera& came
 bool        handleSelectionOnClick(Scene& scene, const Matrix4x4& P, Camera& camera, int W, int H, int panelWidth);
 float       wrapAngle(float angle);
 
-// ─── Main ───────────────────────────────────────────────────────────────────
 int main() {
     int W, H, panelWidth = 350;
     GLFWwindow* win;
@@ -55,21 +53,21 @@ int main() {
 
     Matrix4x4 P = Matrix4x4::projection(float(W - panelWidth) / H, 100.0f, 0.5f, 60.0f * (float)(M_PI / 180.0));
 
-    // Quad VAO (używany przez mainShader do renderowania siatki)
+    // Quad VAO
     unsigned int VAO, VBO;
-    {
-        float verts[] = {
-            -1, 1, 0,1,  -1,-1, 0,0,  1,-1, 1,0,
-            -1, 1, 0,1,   1,-1, 1,0,  1, 1, 1,1
-        };
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(0);
-    }
+    
+    float verts[] = {
+        -1, 1, 0,1,  -1,-1, 0,0,  1,-1, 1,0,
+        -1, 1, 0,1,   1,-1, 1,0,  1, 1, 1,1
+    };
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+    
 
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
@@ -84,7 +82,6 @@ int main() {
     Scene scene;
     scene.addShader(primitiveShader);
 
-    // Tekstura dla offscreen (używana przy resize)
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -94,49 +91,45 @@ int main() {
     glViewport(panelWidth, 0, W - panelWidth, H);
 
     float lastTime = 0.0f;
-    bool  pointsDirty = false;
+    bool firstFrame = true;
 
-    // ─── Główna pętla ──────────────────────────────────────────────────────
     while (!glfwWindowShouldClose(win)) {
         const float currentTime = (float)glfwGetTime();
         const float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
         camera->update(deltaTime);
+
         MouseController::g_scrolled = false;
 
         handleResize(win, panelWidth, W, H, P, tex);
 
-        // Interakcja z zaznaczonymi obiektami (musi być przed flush)
-        applyMouseToSelected(win, scene, pointsDirty);
+        applyMouseToSelected(win, scene, scene.primitivesChanged);
 
-        // Kursor 3D i wykrywanie najbliższego punktu
         handleCursorPlacement(scene, P, *camera, W, H, panelWidth);
         scene.findClosestPoint(P, *camera, panelWidth, W, H);
 
-        // Obsługa kliknięcia – najpierw próba zaznaczenia, potem dodawania
         if (MouseController::g_leftClicked) {
             const bool consumed = handleSelectionOnClick(scene, P, *camera, W, H, panelWidth);
             if (!consumed)
-                handleAddOnClick(scene, P, *camera, W, H, panelWidth, pointsDirty);
+                handleAddOnClick(scene, P, *camera, W, H, panelWidth, scene.primitivesChanged);
         }
 
         MouseController::flush();
 
         // UI
-        Panel::RenderPanel(panelWidth, H, W, P, *camera, scene, pointsDirty);
+        Panel::RenderPanel(panelWidth, H, W, P, *camera, scene, scene.primitivesChanged);
 
-        // Synchronizacja flagi isHighlighted (OR z UI i viewport)
         for (auto& obj : scene.objects) {
             const bool highlight = obj->isHighlightedUI || obj->isHighlightedViewport;
             obj->isHighlighted = highlight;
         }
 
-        // Przebudowa bufora prymitywów (punkty, środek, kursor)
-        primitiveShader->Rebuild(scene.objects, scene.getCenterPoint(), scene.cursorPosition);
-        pointsDirty = false;
+        if (scene.primitivesChanged) {
+            primitiveShader->Rebuild(scene.objects, scene.getCenterPoint(), scene.cursorPosition);
+            scene.primitivesChanged = false;
+        }
 
-        // ─── Render ───────────────────────────────────────────────────────
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
@@ -146,7 +139,13 @@ int main() {
         scene.draw();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        mainShader.Update();
+        
+        if (camera->changed || firstFrame) {
+            mainShader.Update();
+            firstFrame = false;
+        }
+
+        mainShader.draw();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -160,7 +159,6 @@ int main() {
     return 0;
 }
 
-// ─── Inicjalizacja okna ─────────────────────────────────────────────────────
 GLFWwindow* initWindow(int& H, int& W) {
     if (!glfwInit()) return nullptr;
 
@@ -197,7 +195,6 @@ void UpdateScreenSize(int& H, int& W) {
     W = mode->width;
 }
 
-// ─── Obsługa resize ─────────────────────────────────────────────────────────
 bool handleResize(GLFWwindow* win, int panelWidth, int& W, int& H, Matrix4x4& P, GLuint tex) {
     int newW, newH;
     glfwGetFramebufferSize(win, &newW, &newH);
@@ -211,7 +208,6 @@ bool handleResize(GLFWwindow* win, int panelWidth, int& W, int& H, Matrix4x4& P,
     return true;
 }
 
-// ─── Dodawanie obiektów w miejscu kursora ───────────────────────────────────
 void handleAddOnClick(Scene& scene, Matrix4x4& P, Camera& camera,
     int W, int H, int panelWidth, bool& pointsDirty)
 {
@@ -235,7 +231,6 @@ void handleAddOnClick(Scene& scene, Matrix4x4& P, Camera& camera,
     }
 }
 
-// ─── Transformacje zaznaczonych obiektów przy użyciu myszy ─────────────────
 void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
     if (scene.chosen.empty()) return;
 
@@ -245,7 +240,6 @@ void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
     const bool   ctrl = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
     const size_t n = scene.chosen.size();
 
-    // ── Tryb lokalny: jeden obiekt, obrót wokół siebie ──────────────────────
     if (n == 1 && Panel::rotateMode != RotateMode::Cursor) {
         auto& obj = scene.chosen[0];
         if (auto t = std::dynamic_pointer_cast<TransformableObject>(obj))
@@ -255,7 +249,6 @@ void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
         return;
     }
 
-    // ── Tryb grupowy: obrót/skalowanie wokół wspólnego pivotu ───────────────
     auto pivotPoint = (Panel::rotateMode == RotateMode::Cursor)
         ? scene.cursorPosition
         : scene.getCenterPoint();
@@ -271,15 +264,13 @@ void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
         const float ay = ctrl ? 0.0f : -dx;
         const float az = ctrl ? -dx : 0.0f;
 
-        for (auto& obj : scene.chosen)
+        for (auto& obj : scene.chosen) {
             obj->transformAroundPoint(ax, ay, az, 1.0f, 1.0f, 1.0f, pivot);
-
+        }
         pointsDirty = true;
     }
 
-    // Skalowanie – scroll kółkiem
     if (MouseController::g_scrolled >= 0) {
-        // Mnożnik: scroll +1 → ×1.1, scroll -1 → ×0.9
         float s = 1.0f + MouseController::g_scroll * 0.1f;
         s = std::clamp(s, 0.05f, 2.0f);
 
@@ -289,7 +280,6 @@ void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
         pointsDirty = true;
     }
 
-    // Przesuwanie wspólne – PPM (każdy obiekt przesuwa się lokalnie)
     if (MouseController::g_rightDown) {
         for (auto& obj : scene.chosen) {
             if (auto t = std::dynamic_pointer_cast<TransformableObject>(obj))
@@ -300,7 +290,6 @@ void applyMouseToSelected(GLFWwindow* window, Scene& scene, bool& pointsDirty) {
     }
 }
 
-// ─── Transformacje lokalne – torus / obiekt z Transform ────────────────────
 void handleTransformable(TransformableObject* transformable, GLFWwindow* window) {
     const float mult = 0.005f;
     const bool  ctrl = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
@@ -329,7 +318,6 @@ void handleTransformable(TransformableObject* transformable, GLFWwindow* window)
     }
 }
 
-// ─── Transformacje lokalne – punkt ─────────────────────────────────────────
 void handlePoint(Point* point, GLFWwindow* window, bool& pointsDirty) {
     const float mult = 0.005f;
     const bool  ctrl = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
@@ -345,7 +333,6 @@ void handlePoint(Point* point, GLFWwindow* window, bool& pointsDirty) {
     }
 }
 
-// ─── Ustawianie kursora 3D ──────────────────────────────────────────────────
 void handleCursorPlacement(Scene& scene, const Matrix4x4& P, Camera& camera,
     int W, int H, int panelWidth)
 {
@@ -358,7 +345,6 @@ void handleCursorPlacement(Scene& scene, const Matrix4x4& P, Camera& camera,
     ), MouseController::g_leftClicked);
 }
 
-// ─── Zaznaczanie przez kliknięcie ──────────────────────────────────────────
 bool handleSelectionOnClick(Scene& scene, const Matrix4x4& P, Camera& camera,
     int W, int H, int panelWidth)
 {
@@ -378,7 +364,6 @@ bool handleSelectionOnClick(Scene& scene, const Matrix4x4& P, Camera& camera,
         scene.select(best);
     }
     else {
-        // Wyczyść poprzednie zaznaczenie i zaznacz kliknięty
         auto prev = scene.chosen;
         for (auto& s : prev) scene.deselect(s);
         scene.select(best);
@@ -387,7 +372,6 @@ bool handleSelectionOnClick(Scene& scene, const Matrix4x4& P, Camera& camera,
     return true;
 }
 
-// ─── Pomocnicze ────────────────────────────────────────────────────────────
 float wrapAngle(float angle) {
     return fmod(fmod(angle, 2.0f * (float)M_PI) + 2.0f * (float)M_PI, 2.0f * (float)M_PI);
 }

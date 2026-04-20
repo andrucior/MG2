@@ -29,8 +29,6 @@ public:
             * Matrix4x4::translate(-transform.translation);
     }
 
-    // Obrót wokół zewnętrznego punktu (pivot).
-    // Przesuwa środek obiektu po orbicie i akumuluje kąty rotacji.
     void rotateAroundPoint(float ax, float ay, float az, const Vector3& pivot) {
         Matrix4x4 T = Matrix4x4::translate(pivot);
         Matrix4x4 Ti = Matrix4x4::translate(-pivot);
@@ -44,8 +42,6 @@ public:
         transform.rotation.z = wrapAngle(transform.rotation.z + az);
     }
 
-    // Skalowanie wokół zewnętrznego punktu (pivot).
-    // Przesuwa środek proporcjonalnie i mnoży własną skalę.
     void scaleAroundPoint(float sx, float sy, float sz, const Vector3& pivot) {
         transform.translation.x = pivot.x + sx * (transform.translation.x - pivot.x);
         transform.translation.y = pivot.y + sy * (transform.translation.y - pivot.y);
@@ -56,8 +52,6 @@ public:
         transform.scale.z *= sz;
     }
 
-    // Wygodna metoda łącząca obrót i skalowanie w jednym wywołaniu,
-    // stosowana przez applyMouseToSelected gdy wiele obiektów jest zaznaczonych.
     void transformAroundPoint(float ax, float ay, float az,
         float sx, float sy, float sz,
         const Vector3& pivot)

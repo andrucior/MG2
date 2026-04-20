@@ -70,9 +70,9 @@ void Panel::renderObjectList(Scene& scene, bool& pointsDirty, Camera& camera,
             }
 
             std::shared_ptr<Point> cp = scene.cursorPosition;
-            ImGui::DragFloat("Cursor X", &cp->position.x, 0.1f);
-            ImGui::DragFloat("Cursor Y", &cp->position.y, 0.1f);
-            ImGui::DragFloat("Cursor Z", &cp->position.z, 0.1f);
+            pointsDirty |= ImGui::DragFloat("Cursor X", &cp->position.x, 0.1f);
+            pointsDirty |= ImGui::DragFloat("Cursor Y", &cp->position.y, 0.1f);
+            pointsDirty |= ImGui::DragFloat("Cursor Z", &cp->position.z, 0.1f);
 
             ImGui::Separator();
             ImGui::TextDisabled("Wspolrzedne ekranowe");
@@ -84,22 +84,16 @@ void Panel::renderObjectList(Scene& scene, bool& pointsDirty, Camera& camera,
                 depth
             );
 
-            // Wyświetlanie (tylko-do-odczytu)
-            ImGui::LabelText("Screen X", "%.1f", sc.x);
-            ImGui::LabelText("Screen Y", "%.1f", sc.y);
-            ImGui::LabelText("Glebokosc NDC", "%.3f", depth);
-
-            // Edycja — wpisanie nowych pikselowych koordynatów przesuwa kursor w 3D
+            
             static float editSX = sc.x, editSY = sc.y;
             bool changed = false;
-            changed |= ImGui::DragFloat("Edit Screen X", &editSX, 1.0f, (float)panelWidth, (float)W);
-            changed |= ImGui::DragFloat("Edit Screen Y", &editSY, 1.0f, 0.0f, (float)H);
+            changed |= ImGui::DragFloat("Screen (X)", &editSX, 1.0f, (float)panelWidth, (float)W);
+            changed |= ImGui::DragFloat("Screen (Y)", &editSY, 1.0f, 0.0f, (float)H);
             if (changed) {
                 cp->position = camera.screenToWorld(editSX, editSY, W, H, panelWidth, P);
-                scene.cursorFollow = false;  // zatrzymaj śledzenie myszy po ręcznym wpisaniu
+                scene.cursorFollow = false;  
             }
             else {
-                // Synchronizuj pola edycji z aktualną pozycją kursora
                 editSX = sc.x;
                 editSY = sc.y;
             }
@@ -155,9 +149,9 @@ void Panel::renderObjectList(Scene& scene, bool& pointsDirty, Camera& camera,
                 rebuildVerts |= ImGui::DragFloat("r", &torus->r, 0.1f, 0.1f, torus->R - 0.01f);
                 rebuildIndices |= ImGui::DragInt("Dokladnosc", &torus->sides, 1, 2, 120);
 
-                ImGui::DragFloat("Obrot X", &torus->transform.rotation.x, 0.1f, 0, 6.283185307179586f);
-                ImGui::DragFloat("Obrot Y", &torus->transform.rotation.y, 0.1f, 0, 6.283185307179586f);
-                ImGui::DragFloat("Obrot Z", &torus->transform.rotation.z, 0.1f, 0, 6.283185307179586f);
+                ImGui::DragFloat("Obrot X", &torus->transform.rotation.x, 0.1f, 0, 2 * M_PI);
+                ImGui::DragFloat("Obrot Y", &torus->transform.rotation.y, 0.1f, 0, 2 * M_PI);
+                ImGui::DragFloat("Obrot Z", &torus->transform.rotation.z, 0.1f, 0, 2 * M_PI);
 
                 rebuildVerts |= ImGui::DragFloat("X", &torus->transform.translation.x, 0.1f, -100, 100)
                     || ImGui::DragFloat("Y", &torus->transform.translation.y, 0.1f, -100, 100)
@@ -181,6 +175,7 @@ void Panel::renderObjectList(Scene& scene, bool& pointsDirty, Camera& camera,
 
             if (auto point = std::dynamic_pointer_cast<Point>(obj)) {
                 camera.targetGoal = -point->position;
+                
                 pointsDirty |= ImGui::DragFloat("X", &point->position.x, 0.1f, -100, 100)
                     || ImGui::DragFloat("Y", &point->position.y, 0.1f, -100, 100)
                     || ImGui::DragFloat("Z", &point->position.z, 0.1f, -100, 100);

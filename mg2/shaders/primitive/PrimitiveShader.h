@@ -28,4 +28,5 @@ public:
     );
 
     void Update() override;
+    void draw() override;
 };

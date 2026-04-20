@@ -18,7 +18,6 @@ std::string Point::toHashCode() {
     return std::to_string(h1 ^ (h2 << 1));
 }
 
-// Obrót punktu wokół pivot
 void Point::rotateAroundPoint(float ax, float ay, float az, const Vector3& pivot) {
     Matrix4x4 T = Matrix4x4::translate(pivot);
     Matrix4x4 Ti = Matrix4x4::translate(-pivot);
@@ -28,14 +27,12 @@ void Point::rotateAroundPoint(float ax, float ay, float az, const Vector3& pivot
     position = Vector3(newM[0][3], newM[1][3], newM[2][3]);
 }
 
-// Skalowanie punktu wokół pivot: nowa pozycja = pivot + s*(pos - pivot)
 void Point::scaleAroundPoint(float sx, float sy, float sz, const Vector3& pivot) {
     position.x = pivot.x + sx * (position.x - pivot.x);
     position.y = pivot.y + sy * (position.y - pivot.y);
     position.z = pivot.z + sz * (position.z - pivot.z);
 }
 
-// Łączy obrót i skalowanie (interfejs SceneObject wymagany przez applyMouseToSelected)
 void Point::transformAroundPoint(float ax, float ay, float az,
     float sx, float sy, float sz,
     const Vector3& pivot)

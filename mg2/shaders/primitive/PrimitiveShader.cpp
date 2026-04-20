@@ -77,6 +77,11 @@ void PrimitiveShader::Update() {
     glUniform1f(uAxisSize, 0.1f);
     glUniform3f(uColor, 1.f, 1.f, 1.f);
     glPointSize(6.f);
+    
+}
+
+void PrimitiveShader::draw() {
+    glUseProgram(program);
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, (GLsizei)(verts.size() / 7));
 }

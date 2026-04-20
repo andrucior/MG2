@@ -12,6 +12,7 @@ public:
     
     Vector3 targetGoal = Vector3(0, 0, 0); 
     float   lerpSpeed = 5.0f;
+    bool changed = false;
 
     Camera() : TransformableObject() {
         name = nameof(Camera);
@@ -122,7 +123,9 @@ public:
     }
 
     void update(float deltaTime) {
-        // Lerp w stronę celu
-        cameraTarget = Vector3::lerp(cameraTarget, targetGoal, lerpSpeed * deltaTime);
+        changed = !(cameraTarget == targetGoal);
+        if (changed) {
+            cameraTarget = Vector3::lerp(cameraTarget, targetGoal, lerpSpeed * deltaTime);
+        }
     }
 };

@@ -42,6 +42,12 @@ public:
 		return { x / v.x, y / v.y, z / v.z };
 	}
 
+	bool operator==(const Vector3& v) const {
+		return std::abs(v.x - x) < FLT_EPSILON &&
+			std::abs(v.y - y) < FLT_EPSILON &&
+			std::abs(v.z - z) < FLT_EPSILON;
+	}
+
 	Vector3 operator/(float scalar) const {
 		if (scalar <= FLT_EPSILON) {
 			throw std::exception("Can't divide by 0!");

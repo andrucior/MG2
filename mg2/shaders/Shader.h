@@ -41,6 +41,7 @@ public:
         glUniform1f(id, 2.0f);
     }
 
+    virtual void draw() = 0;
     virtual bool ownsObject(const SceneObject*) const { return false; }
 
 };

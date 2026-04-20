@@ -38,11 +38,14 @@ void Scene::setCursor(Vector3 pos, bool clicked) {
     if (clicked) {
         cursorFollow = false;
     }
+
+    primitivesChanged = true;
 }
 
 void Scene::draw() {
     for (auto& shader : shaders) {
         shader->Update();
+        shader->draw();
     }
 }
 

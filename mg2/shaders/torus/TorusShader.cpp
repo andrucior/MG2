@@ -50,6 +50,11 @@ void TorusShader::Update() {
     glUniformMatrix4fv(uV, 1, GL_TRUE, camera.view().toFloatArray().data());
     glUniform1i(uIsSelected, torus.isSelected);
     glUniform1i(uIsHighlighted, torus.isHighlighted);
+    
+}
+
+void TorusShader::draw() {
+    glUseProgram(program);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, torus.indices.size(), GL_UNSIGNED_INT, 0);
 }

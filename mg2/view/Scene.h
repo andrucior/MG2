@@ -10,19 +10,20 @@
 #include "Shader.h"
 #include "Vector2.h"
 #include "Matrix4x4.h"
-
+#include "Torus/TorusShader.h"
 
 class Scene {
 public:
     std::vector<std::shared_ptr<SceneObject>> objects;
     std::vector<std::shared_ptr<SceneObject>> chosen;
-    std::vector<std::shared_ptr<Shader>>      shaders;
+    std::vector<std::shared_ptr<Shader>> shaders;
 
     std::shared_ptr<Point> cursorPosition;
     std::shared_ptr<Point> closestPoint;
 
-    bool    cursorExists = true;
-    bool    cursorFollow = true; 
+    bool cursorExists = true;
+    bool cursorFollow = true; 
+    bool primitivesChanged = true;
 
     Scene() {
         cursorPosition = std::make_shared<Point>(Vector3());
